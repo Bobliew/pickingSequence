@@ -122,6 +122,7 @@ async def main(json_data, xStart, yStart):
         plt.xlabel("X coordinate", fontsize = 14)
         plt.ylabel("Y coordinate", fontsize = 14)
         plt.title("TSP path for orTest", fontsize = 16)
+        plt.show()
         return json_data
     else:
         print('No solution found.')
