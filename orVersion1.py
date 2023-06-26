@@ -3,6 +3,7 @@ import time
 import asyncio
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+import matplotlib.pyplot as plt
 
 def create_data_model(json_data, xStart, yStart):
     locations = []
@@ -10,10 +11,14 @@ def create_data_model(json_data, xStart, yStart):
     for order in json_data:
         for sku in order['skuInfo']:
             locations.append((sku['xCoordAloc'], sku['yCoordAloc']))
+
+    #locations.append([0, 0])  # 将 [0, 0] 添加到 locations 中
+    # 将 depot 设置为新地点的索引
     data = {}
     data['locations'] = locations
     data['num_vehicles'] = 1
     data['depot'] = 0
+    print(data['locations'])
     return data
 
 def compute_euclidean_distance_matrix(locations):
@@ -49,6 +54,7 @@ def print_solution(manager, routing, solution, xStart, yStart):
     routing_list = []
     routing_map = {}
     j = 0
+    
     while not routing.IsEnd(index):
         plan_output += ' {} ->'.format(manager.IndexToNode(index))
         routing_map[index] = j
@@ -57,13 +63,14 @@ def print_solution(manager, routing, solution, xStart, yStart):
         index = solution.Value(routing.NextVar(index))
         route_distance += routing.GetArcCostForVehicle(previous_index, index, 0)
     plan_output += ' {}\n'.format(manager.IndexToNode(index))
-    #print(plan_output)
+    print(plan_output)
     del routing_map[0]
     #print(routing_map)
     # plan_output += 'Route distance: {}miles\n'.format(route_distance)
     for i in range( 1, j):
         routing_list.append(routing_map[i])
-    print(routing_map)
+    #print(routing_map)
+    print(routing_list)
     return routing_list
 
 async def main(json_data, xStart, yStart):
@@ -94,23 +101,39 @@ async def main(json_data, xStart, yStart):
     if solution:
         route_list = print_solution(manager, routing, solution, xStart, yStart)
         i = 0
+
+        # 将生成的数据导入到原来的json数据集中
         for item1 in json_data:
             for item2 in item1["skuInfo"]:
                 item2["pickingSequence"] = route_list[i]
                 i+=1
         print(f'handled Json data: {json_data}')
+        print(route_list)
+        # 可视化
+        depot_coor = (0,0)
+        plt.plot(depot_coor[0], depot_coor[1], 'r*')
+        routeList = [0]
+        routeList+=route_list
+        print(routeList)
+        for i in range(0,len(routeList)):
+            start_coor = data['locations'][routeList[i]]
+            end_coor = data['locations'][routeList[i]]
+            plt.arrow(start_coor[0], start_coor[1], end_coor[0] - start_coor[0], end_coor[1] - start_coor[1])
+        plt.xlabel("X coordinate", fontsize = 14)
+        plt.ylabel("Y coordinate", fontsize = 14)
+        plt.title("TSP path for orTest", fontsize = 16)
         return json_data
     else:
         print('No solution found.')
 
 async def runmain(raw_data, xStart, yStart):
     tasks = []
+    semaphore = asyncio.Semaphore(10)
     for item in raw_data["batchInfo"]:
         tasks.append(main(item["outOrderInfo"], xStart, yStart))
     result = await asyncio.gather(*tasks) # 需要在这之后重新整合为一个
     for i in range(len(raw_data["batchInfo"])):
         raw_data["batchInfo"][i]["outOrderInfo"] = result[i]
-
     return raw_data
         
 
