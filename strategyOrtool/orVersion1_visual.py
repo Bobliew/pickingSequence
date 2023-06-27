@@ -133,7 +133,7 @@ async def runmain(raw_data, xStart, yStart):
 
 if __name__ == '__main__':
     start_time = time.time()
-    f = open('./quickStart/output.json', 'r')
+    f = open('../quickStart/output.json', 'r')
     content = f.read()
     a = json.loads(content)
     f.close()

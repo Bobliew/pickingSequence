@@ -59,19 +59,3 @@ async def runMain(raw_data, xStart, yStart):
     return raw_data
         
 
-
-if __name__ == '__main__':
-    start_time = time.time()
-    f = open('./quickStart/output.json', 'r')
-    content = f.read()
-    a = json.loads(content)
-    f.close()
-    inputData = json.loads(a)
-    #print(type(inputData))
-    result = asyncio.run(runMain(inputData, 0, 0))
-    end_time = time.time()  # 记录程序结束时间
-    print("\n 最终结果：\n")
-    print("{}".format(result))
-    elapsed_time = end_time - start_time
-    print("计算时间为：{}秒".format(elapsed_time))
-

@@ -57,7 +57,7 @@ def print_solution(manager, routing, solution, xStart, yStart):
     """Prints solution on console."""
     print('\n \n起始点X坐标：{}'.format(xStart))
     print('起始点y坐标：{}'.format(yStart))
-    print('路程(): {} 米'.format(solution.ObjectiveValue()/1000))
+    print('路程估算: {} 米'.format(solution.ObjectiveValue()/1000))
     index = routing.Start(0)
     plan_output = '访问路径:\n'
     route_distance = 0
