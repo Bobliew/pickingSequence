@@ -35,10 +35,10 @@ def routing_Picking_Sequence_Ortool_version1():
     start_time = time.time()
     jsonData = request.get_json()
     jsonData = json.loads(jsonData)
-    print(type(jsonData))
+    #print(type(jsonData))
     # (0,0)是设定好的depot点，response_data是从请求获得的数据
     response_data = asyncio.run(runMain(jsonData, 0, 0))
-    print(response_data)
+    #print(response_data)
     response = Response(response_data, content_type='json')
     # jsonData = json.dumps(str(response_data))
     end_time = time.time()
@@ -46,6 +46,18 @@ def routing_Picking_Sequence_Ortool_version1():
     print("最终结果：{}".format(response_data))
     print("计算时间为：{}秒".format(elapsed_time))
     return response_data
+
+
+@app.route('/routing_Picking_Sequence_Lkh_version1', method=['POST'])
+def routing_Picking_Sequence_Lkh_version1():
+    start_time = time.time()
+    jsonData = request.get_json()
+    jsonData = json.loads(jsonData)
+
+    response = asyncio.run()
+
+    response = Response(response_data, content_type='json')
+    end_time = time.time()
 
 
 
