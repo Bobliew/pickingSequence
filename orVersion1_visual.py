@@ -3,6 +3,7 @@ import time
 import asyncio
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+import matplotlib.pyplot as plt
 
 # orVersion1 is combined with visualization
 
@@ -110,7 +111,20 @@ async def main(json_data, xStart, yStart):
                 i+=1
         print(f'handled Json data: {json_data}')
         print(route_list)
-
+        # 可视化
+        depot_coor = (0,0)
+        plt.plot(depot_coor[0], depot_coor[1], 'r*')
+        routeList = [0]
+        routeList+=route_list
+        print(routeList)
+        for i in range(0,len(routeList)-1):
+            start_coor = data['locations'][routeList[i]]
+            end_coor = data['locations'][routeList[i+1]]
+            plt.arrow(start_coor[0], start_coor[1], end_coor[0] - start_coor[0], end_coor[1] - start_coor[1])
+        plt.xlabel("X coordinate", fontsize = 14)
+        plt.ylabel("Y coordinate", fontsize = 14)
+        plt.title("TSP path for orTest", fontsize = 16)
+        plt.show()
         return json_data
     else:
         print('No solution found.')
@@ -129,7 +143,7 @@ async def runmain(raw_data, xStart, yStart):
 
 if __name__ == '__main__':
     start_time = time.time()
-    f = open('output.json', 'r')
+    f = open('./quickStart/output.json', 'r')
     content = f.read()
     a = json.loads(content)
     f.close()
