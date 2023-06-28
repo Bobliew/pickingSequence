@@ -16,11 +16,11 @@ def generate_2d_array(n):
     return array
 
 
-async def run_testmain(par_file, index):
+async def run_testmain(par_file, index, batches):
     # Generate TSP file
     tsp_file = '../File/prFile/tspFile/tsp_file{}.tsp'.format(index)
  
-    batches = generate_2d_array(X)
+    #batches = generate_2d_array(X)
     generate_tsp_file(tsp_file, batches)
 
     # Generate parameter file
@@ -47,6 +47,7 @@ def generate_tsp_file(filename, batches):
         # Write the footer
         f.write('EOF\n')
 '''
+
 # 用内存读写代替磁盘读写
 def generate_tsp_file(filename, batches):
     with io.StringIO() as f:
@@ -58,8 +59,17 @@ def generate_tsp_file(filename, batches):
         f.write('EDGE_WEIGHT_TYPE: EUC_2D\n')
         # Write the city coordinates
         f.write('NODE_COORD_SECTION\n')
-        for i, city in enumerate(batches):
-            f.write('{} {} {}\n'.format(i + 1, city[0], city[1]))
+        
+        # 该情况是请求格式为json数据（集单策略模块的输出格式）
+        x = 1
+        for item2 in item1["outOrderInfo"]:
+            for item3 in item2["skuInfo"]:
+                f.write('{} {} {}\n'.format(x, item3["xCoordAloc"], item3["yCoordALoc"]))
+                x += 1
+
+        # 本地随机生成数据时，batches只是一个[[]]，因此此时情况相对来说是更简单的；
+        #for i, city in enumerate(batches):
+        #   f.write('{} {} {}\n'.format(i + 1, city[0], city[1]))
 
         # Write the footer
         f.write('EOF\n')
@@ -95,22 +105,35 @@ def generate_parameter_file(output_filename, index):
     with io.open(output_filename, 'w', newline='\n') as file:
         file.write('\n'.join(parameters))
 
-async def main():
+async def lkhMain(batches):
     # Run multiple testmain functions asynchronously
     tasks = []
     # tasks：异步任务列表，由于routing的时候，每两个集单之间的状态是不会相互影响的；
     # 所以可以采用异步的方法来加速计算；
     # 异步数量设置为50,default值，但取决于公司服务器的负载;
     # range 后续应该设置为 min(50, len(batch_pool))
-    semaphore = asyncio.Semaphore(Y)
-    for i in range(Y):
+    semaphore = asyncio.Semaphore(len(batches["batchInfo"]))
+    for item1 in batches["batchInfo"]:
         par_file = '../File/prFile/prFile/pr{}.par'.format(i)
         tasks.append(asyncio.create_task(run_testmain(par_file, i)))
-    await asyncio.gather(*tasks)
+    await result = asyncio.gather(*tasks)
+    # 用一个map储存result
+    sequenceMap = {}
+    for item1 in batches["batchInfo"]:
+        for item2 in item1["orderInfo"]:
+            item2["skuInfo"]
+        
 
 if __name__ == '__main__':
+    # 要么存一个队列，固定10000个不重复的string；
+    # 然后每个协程都给一个，结束又放回；
+    # 解决方案，每次生成名为snCode的文件夹;
+    # 然后在完成计算之后再删除掉这个文件夹;
+    # 这样可以避免并发异步时可能出现多个请求同时在读写同一个tsp file或者par file;
+    # 不过该方案仍是一个折衷方案，应谋求更优雅的解决办法;
     start_time = time.time()  # 记录程序开始时间
-    asyncio.run(main())
+   with io.open("../../quickStart/output.json", 'w') as file:
+        asyncio.run(lkhMain(file))
     end_time = time.time()  # 记录程序结束时间
     elapsed_time = end_time - start_time
-    print("LKH执行{}个包含{}个sku的异步路径规划任务耗费的时间为：{}秒".format(Y, X, elapsed_time))
+    print("任务耗费的时间为：{}秒".format(elapsed_time))

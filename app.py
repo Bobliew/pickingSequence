@@ -47,17 +47,15 @@ def routing_Picking_Sequence_Ortool_version1():
     print("计算时间为：{}秒".format(elapsed_time))
     return response_data
 
-
-@app.route('/routing_Picking_Sequence_Lkh_version1', method=['POST'])
-def routing_Picking_Sequence_Lkh_version1():
-    start_time = time.time()
-    jsonData = request.get_json()
-    jsonData = json.loads(jsonData)
-
-    response = asyncio.run()
-
-    response = Response(response_data, content_type='json')
-    end_time = time.time()
+# version 2 LKH求解拣货顺序问题
+#@app.route('/routing_Picking_Sequence_Lkh_version1', method=['POST'])
+#def routing_Picking_Sequence_Lkh_version1():
+#    start_time = time.time()
+#    jsonData = request.get_json()
+#    jsonData = json.loads(jsonData)
+#    response = asyncio.run()
+#    response = Response(response_data, content_type='json')
+#    end_time = time.time()
 
 
 
