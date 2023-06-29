@@ -34,10 +34,11 @@ async def singleMain(json_data, xStart, yStart):
     # 路径搜索初始可行解的策略为PATH_CHEAPEST_ARC
     search_parameters.first_solution_strategy = (
         routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
-    search_parameters.local_search_metaheuristic = (
-        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
-    search_parameters.time_limit.seconds = 10
-    search_parameters.log_search = True
+    如果不指定
+    #search_parameters.local_search_metaheuristic = (
+    #    routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
+    #search_parameters.time_limit.seconds = 1
+    #search_parameters.log_search = True
 
     # 调用SolveWithParameters()函数求解路径规划问题
     solution = routing.SolveWithParameters(search_parameters)
