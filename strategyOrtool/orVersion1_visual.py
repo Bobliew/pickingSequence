@@ -1,7 +1,7 @@
 import json
 import time
 import asyncio
-from utils.visual import *
+from ..utils.visual import *
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 import matplotlib.pyplot as plt
