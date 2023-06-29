@@ -34,23 +34,26 @@ async def singleMain(json_data, xStart, yStart):
     # 路径搜索初始可行解的策略为PATH_CHEAPEST_ARC
     search_parameters.first_solution_strategy = (
         routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
-    如果不指定
+    # 如果不指定局部搜索策略，ortools会自动采用默认的启发式策略，
+    # 经过测试，结果是较为类似的，且计算耗时会下降较多，因为如果需要指定局部搜索
+    # 策略，就需要定义limit.seconds，无法及时停止；
     #search_parameters.local_search_metaheuristic = (
     #    routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
     #search_parameters.time_limit.seconds = 1
     #search_parameters.log_search = True
 
-    # 调用SolveWithParameters()函数求解路径规划问题
+    # 调用SolveWithParameters()函数，基于search_parameter求解路径规划问题
     solution = routing.SolveWithParameters(search_parameters)
 
     if solution:
-        # 解析求解结果并生成路径列表
+        # 解析求解结果并生成路径列表, 
+        # 调用print_solution打印结果, 同时print_solution会返回对应拣货顺序的列表
         route_list = print_solution(manager, routing, solution, xStart, yStart)
         i = 0
-
         # 将生成的数据导入到原来的json数据集中
         for item1 in json_data:
             for item2 in item1["skuInfo"]:
+                # 为每个sku添加“pickingSequence”字段，即该sku在本集单内的拣货顺序
                 item2["pickingSequence"] = route_list[i]
                 i+=1
         print(f'handled Json data: {json_data}')
