@@ -10,7 +10,11 @@ import json
 # 定义app为Falsk框架的名称
 app = Flask(__name__)
 # 放开最大请求大小限制
-app.config['MAX_CONTENT_LENGTH'] = None
+app.config[
+
+
+
+    'MAX_CONTENT_LENGTH'] = None
 # 放开JSON响应的容量限制
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 # 放开静态文件的缓存时间限制
@@ -34,7 +38,9 @@ def hello():
 def routing_Picking_Sequence_Ortool_version1():
     start_time = time.time()
     jsonData = request.get_json()
-    jsonData = json.loads(jsonData)
+    #print(type(jsonData))
+    #print(jsonData)
+    #jsonData = json.loads(jsonData)
     #print(type(jsonData))
     # (0,0)是设定好的depot点，response_data是从请求获得的数据
     response_data = asyncio.run(runMain(jsonData, 0, 0))

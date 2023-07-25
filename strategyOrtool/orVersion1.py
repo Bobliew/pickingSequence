@@ -8,6 +8,7 @@ from ortools.constraint_solver import pywrapcp
 # 异步对每个集单进行计算
 async def singleMain(json_data, xStart, yStart):
     # 调用create_data_model()函数;
+    get_data_from_IOT(json_data)
     data = create_data_model(json_data, xStart, yStart)
     # 创建RoutingIndexManager，par1:节点数量 par2:车的数量 par3:起始点和终点
     manager = pywrapcp.RoutingIndexManager(len(data['locations']),
@@ -51,11 +52,11 @@ async def singleMain(json_data, xStart, yStart):
         route_list = print_solution(manager, routing, solution, xStart, yStart)
         i = 0
         # 将生成的数据导入到原来的json数据集中
+        print("solution json_data", json_data)
         for item1 in json_data:
-            for item2 in item1["skuInfo"]:
-                # 为每个sku添加“pickingSequence”字段，即该sku在本集单内的拣货顺序
-                item2["pickingSequence"] = route_list[i]
-                i+=1
+            # 为每个sku添加“pickingSequence”字段，即该sku在本集单内的拣货顺序
+            item1["pickingSequence"] = route_list[i]
+            i+=1
         print(f'handled Json data: {json_data}')
         print(route_list)
 
@@ -69,15 +70,23 @@ async def runMain(raw_data, xStart, yStart):
     tasks = []
     # 最大协程数量, 目前不需要设置
     # semaphore = asyncio.Semaphore(10)
+    #print("rax_data", raw_data)
     for item in raw_data["batchInfo"]:
         # 由于集单之间是没有相关性的，因此把订单池按照集单进行拆分，每个集单
         # 由一个协程处理。
-        tasks.append(singleMain(item["outOrderInfo"], xStart, yStart))
+        tasks.append(singleMain(item["shelfInfo"], xStart, yStart))
     # await会等待所有协程结束然后将所有结果整合为一个list输出到result中
+    #print("1111111111111111111111111111111111111111111111111111111111111")
     result = await asyncio.gather(*tasks) # 需要在这之后重新整合为一个
     # 将输出的新字段重新加回到原始数据中并返回
+    print("result:", result)
     for i in range(len(raw_data["batchInfo"])):
-        raw_data["batchInfo"][i]["outOrderInfo"] = result[i]
+        raw_data["batchInfo"][i]["shelfInfo"] = result[i]
+    print("raw_data", raw_data)
+    for item in raw_data["batchInfo"]:
+        for item1 in item["shelfInfo"]:
+            del item1["xCoordAloc"]
+            del item1["yCoordAloc"]
     return raw_data
         
 

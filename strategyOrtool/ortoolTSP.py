@@ -1,17 +1,37 @@
-import json
-from ortools.constraint_solver import routing_enums_pb2
-from ortools.constraint_solver import pywrapcp
+import requests
+
 
 # orVersion1 出于对计算性能的考虑是没有进行可视化的；
+
+import requests
+
+def get_data_from_IOT(json_data):
+    # 提取所有 allocateLocation 值到一个列表中
+    shelves = [item["allocateLocation"] for item in json_data]
+    # 发送请求获取坐标信息
+    params = {'shelves': shelves}
+    #print(params)
+    response = requests.get('https://asa-logi.net/adapter-api/geo/shelf/coordinates', params=params)
+
+    # 解析坐标信息并更新原始数据
+    if response.status_code == 200:
+        data = response.json()
+        #print("json_data", json_data)
+        #print("data", data)
+        for shelf in json_data:
+            for i in range(len(data)):
+                if shelf["allocateLocation"] == data[i]["shelf"]:
+                    shelf["xCoordAloc"] = data[i]["coordinates"]["x"]
+                    shelf["yCoordAloc"] = data[i]["coordinates"]["y"]
 
 def create_data_model(json_data, xStart, yStart):
     locations = []
     # 添加depot点，因为传进来的orderInfo是只有sku的x，y坐标，没包含depot点的坐标的；
     locations.append((xStart, yStart))
+    print(json_data)
     # 添加x，y坐标点到locations列表中；
     for order in json_data:
-        for sku in order['skuInfo']:
-            locations.append((sku['xCoordAloc'], sku['yCoordAloc']))
+        locations.append((order['xCoordAloc'], order['yCoordAloc']))
     # Ortools计算所需的数据；
     data = {}
     # 需要抵达的sku点；
